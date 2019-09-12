@@ -1,35 +1,16 @@
 from datetime import datetime
-from flask import Flask, render_template, url_for, flash, redirect
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, render_template, url_for, redirect
+from flask_pymongo import PyMongo
+from flask_bootstrap import Bootstrap
 from forms import RegistrationForm, LoginForm
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
-db = SQLAlchemy(app)
+app = Flask(__name__,
+            template_folder="templates/bootstrap/")
 
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
-    password = db.Column(db.String(60), nullable=False)
-    posts = db.relationship('Post', backref='author', lazy=True)
-
-    def __repr__(self):
-        return f"User('{self.username}', '{self.email}', '{self.image_file}')"
-
-
-class Post(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    content = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
-    def __repr__(self):
-        return f"Post('{self.title}', '{self.date_posted}')"
+app.config['SECRET_KEY'] = '7134743777217A25432A462D4A614E64'
+app.config["MONGO_URI"] = "mongodb://localhost:27017/hoqu"
+mongo = PyMongo(app)
+Bootstrap(app)
 
 
 posts = [
@@ -37,14 +18,14 @@ posts = [
         'author': 'László Holler',
         'title': 'DEV Post 1',
         'content': 'First post of the day',
-        'date_posted': '2019-09-09'
+        'insert_date': '2019-09-10'
     },
     {
         'author': 'Gábor Gábor',
         'title': 'DEV Post 2',
         'content': 'Second post of the day',
-        'date_posted': '2019-09-10'
-    }
+        'insert_date': '2019-09-10'
+    },
 ]
 
 @app.route("/")
@@ -55,17 +36,19 @@ def home():
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
-    if form.validate_on_submit():
-        flash(f'Account created for {form.username.data}!', 'success')
-        return redirect(url_for('home'))
     return render_template('register.html', title='Register', form=form)
 
 
-@app.route("/login", methods=['GET', 'POST'])
-def login():
+@app.route("/login_2", methods=['GET', 'POST'])
+def login_2():
     form = LoginForm()
-    return render_template('login.html', title='Login', form=form)
+    return render_template('login_2.html', title='Login', form=form)
+
+@app.route("/base")
+def base():
+    return render_template('base.html', title='base')    
 
 
 if __name__ == '__main__':
     app.run(debug=True)
+
