@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import Flask, render_template, url_for, redirect
+from flask import Flask, render_template, url_for, redirect, request, jsonify
 from flask_pymongo import PyMongo
 from flask_bootstrap import Bootstrap
 from forms import RegistrationForm, LoginForm
@@ -41,8 +41,11 @@ def register():
 
 @app.route("/login_2", methods=['GET', 'POST'])
 def login_2():
+    if request.method == 'GET':
+        query = request.args
+        data = mongo.db.users.find_one(query)
     form = LoginForm()
-    return render_template('login_2.html', title='Login', form=form)
+    return render_template('login_2.html', title='Login', form=form, data=data)
 
 @app.route("/base")
 def base():
