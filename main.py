@@ -2,7 +2,8 @@ from datetime import datetime
 from flask import Flask, render_template, url_for, redirect, request, jsonify
 from flask_pymongo import PyMongo
 from flask_bootstrap import Bootstrap
-from forms import RegistrationForm, LoginForm
+from forms import RegistrationForm, LoginForm, PostForm
+from flask_login import login_user, current_user, logout_user, login_required
 
 app = Flask(__name__,
             template_folder="templates/bootstrap/")
@@ -12,26 +13,11 @@ app.config["MONGO_URI"] = "mongodb://localhost:27017/hoqu"
 mongo = PyMongo(app)
 Bootstrap(app)
 
-
-posts = [
-    {
-        'author': 'László Holler',
-        'title': 'DEV Post 1',
-        'content': 'First post of the day',
-        'insert_date': '2019-09-10'
-    },
-    {
-        'author': 'Gábor Gábor',
-        'title': 'DEV Post 2',
-        'content': 'Second post of the day',
-        'insert_date': '2019-09-10'
-    },
-]
-
 @app.route("/")
 @app.route("/home")
 def home():
-    return render_template('home.html', posts=posts)
+    form = LoginForm()
+    return render_template('home.html', form=form)
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -39,18 +25,36 @@ def register():
     return render_template('register.html', title='Register', form=form)
 
 
-@app.route("/login_2", methods=['GET', 'POST'])
-def login_2():
+@app.route("/login", methods=['GET', 'POST'])
+def login():
     if request.method == 'GET':
         query = request.args
         data = mongo.db.users.find_one(query)
+
+        #data = request.get_json() 
+    
+   
+    if request.method == 'POST':
+        print(data)
+        
+        ''''email =  data['email']
+        password =  data['password']
+        if email is not None and password is not None:
+            mongo.db.users.insert_one(data)
+            return jsonify({'ok': True, 'message': 'User created successfully!'}), 200
+        else:
+            return jsonify({'ok': False, 'message': 'Bad request parameters!'}), 400    '''
     form = LoginForm()
-    return render_template('login_2.html', title='Login', form=form, data=data)
+    return render_template('login.html', title='Login', form=form, data=data)
+
+@app.route("/<ObjectId:task_id>")
+def show_post(post_id):
+    post = mongo.db.tasks.find_one_or_404(post_id)
+    return render_template("posts.html", posts=post)
 
 @app.route("/base")
 def base():
-    return render_template('base.html', title='base')    
-
+    return render_template('base.html', title='base')
 
 if __name__ == '__main__':
     app.run(debug=True)
