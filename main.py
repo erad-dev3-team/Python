@@ -11,7 +11,9 @@ app = Flask(__name__,
 app.config['SECRET_KEY'] = '7134743777217A25432A462D4A614E64'
 app.config["MONGO_URI"] = "mongodb://localhost:27017/hoqu"
 mongo = PyMongo(app)
+users = mongo.db.users
 Bootstrap(app)
+
 
 @app.route("/")
 @app.route("/home")
@@ -35,8 +37,11 @@ def login():
     
    
     if request.method == 'POST':
-        print(data)
-        
+            #Adding a Task  
+        email=request.values.get("email")  
+        password=request.values.get("password")  
+        users.insert({ "email":email, "password":password})  
+        return redirect("/home") 
         ''''email =  data['email']
         password =  data['password']
         if email is not None and password is not None:
