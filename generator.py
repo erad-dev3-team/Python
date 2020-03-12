@@ -1,3 +1,4 @@
+# source : https://www.programiz.com/python-programming/generator
 # Initialize the list
 my_list = ['1', '3', '6', '10']
 
